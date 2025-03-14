@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/course.css')}}">
+</head>
+<body>
+    <div id="courseModal" class="modal">
+        <div class="modal-content container">
+            <form method="post">
+                <h2>Edit Question</h2>
+                <div class="button-top">
+                    <button class="del" onclick="window.location.href='/deletedb/question/{{id}}/{{no}}';" type="button">Delete</button>
+                    <button class="add" onclick="window.location.href='/update_question/{{id}}';" type="button">Add</button>
+                </div>
+                {% for q in question %}
+                <div class="coursefield" name="title">
+                    <p><strong>Question:</strong> <span id="title"></span></p>
+                    <input type="text" name="question_text" placeholder="Course Name" required value="{{q[2]}}">
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Options:</strong> <span id="title"></span></p>
+                    <div class="option">
+                        {% for o in options %}
+                        <input type="text" name="options[]" required value="{{o['text']}}">
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Correct Answer:</strong> <span id="title"></span></p>
+                    <input type="text" name="answer" placeholder="Course Name" required value="{{q[4]}}">
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Points:</strong> <span id="title"></span></p>
+                    <input type="text" name="points" placeholder="Course Name" required value="{{q[5]}}">
+                </div>
+                {% endfor %}
+                <div class="button">
+                    <button onclick="addCourse()">Update</button>
+                    <button onclick="window.location.href='/update_question/{{id}}/{{no}}';" type="button">Next</button>
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+
+    
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add Quiz Question</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/course.css')}}">
+</head>
+
+<body>
+    <div id="courseModal" class="modal">
+        <div class="modal-content container">
+            <form method="post">
+                <h2>Add Quiz Question</h2>
+
+
+                <div class="coursefield" name="title">
+                    <p><strong>Course:</strong> <span id="title"></span></p>
+                    <select name="course_id" required>
+                        <option value="{{current[0]}}" selected>{{current[1]}}</option>
+                        {% for course in courses %}
+                        <option value="{{ course[0] }}">{{ course[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Question:</strong> <span id="title"></span></p>
+                    <input type="text" name="question_text" placeholder="Course Name" required>
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Options:</strong> <span id="title"></span></p>
+                    <div class="option">
+                        <input type="text" name="options[]" required>
+                        <input type="text" name="options[]" required>
+                        <input type="text" name="options[]" required>
+                        <input type="text" name="options[]" required>
+                    </div>
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Correct Answer:</strong> <span id="title"></span></p>
+                    <input type="text" name="answer" placeholder="Course Name" required>
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Points:</strong> <span id="title"></span></p>
+                    <input type="text" name="points" placeholder="Course Name" required>
+                </div>
+                <div class="button">
+                    <button type="submit">Add Question</button>
+                    <button onclick="window.location.href='/dashboard';" type="button">Dashboard</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

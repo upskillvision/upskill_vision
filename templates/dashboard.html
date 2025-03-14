@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Upskill Vision</div>
+        <div class="nav-links">
+            <a href="#">Dashboard</a>
+            <a href="#" class="active">Courses</a>
+            <a href="#">Profile</a>
+            <a href="#">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Previous sidebar code remains same -->
+        <aside class="sidebar">
+            <div class="course-features">
+                <h2>Course Features</h2>
+                <ul>
+                    <li>📚 Courses</li>
+                    <li>📥 Inbox</li>
+                    <li>🛒 Cart</li>
+                    <li>🔄 Sharing</li>
+                    <li>🏆 Achievements</li>
+                </ul>
+            </div>
+
+            <div class="favorite-list">
+                <h2>Favourite List</h2>
+                <div class="favorite-items">
+                    <div class="favorite-item">
+                        <span>iOS App Design +</span>
+                        <span>(10)</span>
+                    </div>
+                    <div class="favorite-item">
+                        <span>UX Research +</span>
+                        <span>(94)</span>
+                    </div>
+                    <div class="favorite-item">
+                        <span>Principle +</span>
+                        <span>(55)</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-container">
+                    <input type="text" class="search-bar" placeholder="Search Here">
+                </div>
+                <a href="/add_course"><button class="add-course-btn" >Add Course</button></a>
+            </div>
+            
+            <!-- Previous courses grid code remains same -->
+            <div class="courses-grid">
+                <!-- Course cards remain same -->
+                {% for course,manager in courses %}
+                <div class="course-card" id="{{course[0]}}" style="background: linear-gradient(rgba(255,255,255,.7), rgba(255,255,255,.7)),url({{course[5]}});background-repeat: no-repeat;background-size: cover;background-position: center;opacity: 1;">
+                    <h3 class="course-title">{{ course[1] }}</h3>
+                    <p class="course-description">{{course[2]}}</p>
+                    <div class="course-instruction">
+                        <h4>{{manager[0]}}</h4>
+                        <h4>{{course[3]}} unit</h4>
+                    </div>
+                    <div class="button-group">
+                        <button class="view-course-btn" onclick="window.location.href='/update_course/{{course[0]}}'">Edit</button>
+                        <button class="delete-course-btn" onclick="deleteCourse({{course[0]}});">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete this course?</p>
+            <div class="form-buttons">
+                <button id="confirmDelete" class="delete-btn">Delete</button>
+                <button onclick="closeDeleteModal()" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function deleteCourse(courseId) {
+    courseToDelete = courseId;
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    deleteModal.style.display = 'block';
+    
+    // Set up confirmation button
+    document.getElementById('confirmDelete').onclick = function() {
+        const courseElement = document.getElementById(courseId);
+        if (courseElement) {
+            // Add removal animation
+            courseElement.classList.add('removing');
+            // Remove element after animation
+            setTimeout(() => {
+                courseElement.remove();
+            }, 300);
+        }
+        closeDeleteModal();
+        window.location.href='/deletedb/'+courseId;
+    };
+}
+        function closeDeleteModal() {
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    deleteModal.style.display = 'none';
+    courseToDelete = null;
+}
+    </script>
+</body>
+</html>

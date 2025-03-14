@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/course.css')}}">
+</head>
+<body>
+    <div id="courseModal" class="modal">
+        <div class="modal-content container">
+            <form method="post">
+                <h2>Edit Question</h2>
+                <div class="button-top">
+                    <button class="add" onclick="window.location.href='/update_add_module/{{id}}/{{no-1}}';" type="button">Add</button>
+                    <button class="del" onclick="window.location.href='/deletedb/module/{{id}}/{{no}}';" type="button">Delete</button>
+                    <button class="add" onclick="window.location.href='/update_add_module/{{id}}/{{no}}';" type="button">Add</button>
+                </div>
+                {% for m in module %}
+                <div class="coursefield" name="title">
+                    <p><strong>Title:</strong> <span id="title"></span></p> 
+                    <input type="text" name="title" placeholder="Course Name" required value="{{m[2]}}">
+                </div>
+                <div class="coursefield" name="content">
+                    <p><strong>Content:</strong> <span id="content"></span></p>
+                    <textarea type="text" name="content" placeholder="Description" required>{{m[3]}}</textarea>
+                </div>
+                <div class="coursefield" name="duration">
+                    <p><strong>Learning Points:</strong> <span id="duration"></span></p>
+                    <input type="number" name="learning_points" placeholder="Duration (months)" required value="{{m[4]}}">
+                </div>
+                {% endfor %}
+                <div class="button">
+                    <button onclick="addCourse()">Update</button>
+                    <button onclick="window.location.href='/update_module/{{id}}/{{no}}';" type="button">Next</button>
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+
+    
+</body>
+
+</html>

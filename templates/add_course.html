@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/course.css')}}">
+</head>
+<body>
+    <div id="courseModal" class="modal">
+        <div class="modal-content container">
+            <form method="post">
+                <h2>Add New Course</h2>
+                <div class="coursefield" name="title">
+                    <p><strong>Title:</strong> <span id="title"></span></p> 
+                    <input type="text" name="title" placeholder="Course Name" required>
+                </div>
+                <div class="coursefield" name="description">
+                    <p><strong>Description:</strong> <span id="description"></span></p>
+                    <textarea type="text" name="description" placeholder="Description" required></textarea>
+                </div>
+                <div class="coursefield" name="duration">
+                    <p><strong>Duration:</strong> <span id="duration"></span></p>
+                    <input type="number" name="duration" placeholder="Duration (months)" required>
+                </div>
+                <div class="coursefield">
+                    <p><strong>Mentor:</strong> <span id="mentor"></span></p>
+                    <input type="text" name="mentor" placeholder="Manager ID" required>
+                </div>
+                <div class="coursefield">
+                    <p><strong>Image URL:</strong> <span id="mentor"></span></p>
+                    <input type="text" name="image" placeholder="Image URL" required>
+                </div>
+                <div class="button">
+                    <button onclick="">Add Course</button>
+                    <button onclick="window.location.href='/add_module';" type="button">Add Module</button>
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+
+    
+</body>
+
+</html>

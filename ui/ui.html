@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upskill Vision Dashboard</title>
+    <link rel="stylesheet" href="ui.css">
+</head>
+<body>
+    <!-- Previous navbar code remains same -->
+    <nav class="navbar">
+        <div class="logo">Upskill Vision</div>
+        <div class="nav-links">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Courses</a>
+            <a href="#">Profile</a>
+            <a href="#">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Previous sidebar code remains same -->
+        <aside class="sidebar">
+            <div class="course-features">
+                <h2>Course Features</h2>
+                <ul>
+                    <li>📚 Courses</li>
+                    <li>📥 Inbox</li>
+                    <li>🛒 Cart</li>
+                    <li>🔄 Sharing</li>
+                    <li>🏆 Achievements</li>
+                </ul>
+            </div>
+
+            <div class="favorite-list">
+                <h2>Favourite List</h2>
+                <div class="favorite-items">
+                    <div class="favorite-item">
+                        <span>iOS App Design +</span>
+                        <span>(10)</span>
+                    </div>
+                    <div class="favorite-item">
+                        <span>UX Research +</span>
+                        <span>(94)</span>
+                    </div>
+                    <div class="favorite-item">
+                        <span>Principle +</span>
+                        <span>(55)</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-container">
+                    <input type="text" class="search-bar" placeholder="Search Here">
+                </div>
+                <button class="add-course-btn" onclick="openModal()">Add Course</button>
+            </div>
+            
+            <!-- Previous courses grid code remains same -->
+            <div class="courses-grid">
+                <!-- Course cards remain same -->
+            </div>
+
+            <!-- Add Course Modal -->
+            <div id="addCourseModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h2>Add New Course</h2>
+                    <form id="addCourseForm" onsubmit="handleSubmit(event)">
+                        <div class="form-group">
+                            <label for="courseId">Course ID:</label>
+                            <input type="text" id="courseId" name="courseId" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="courseTitle">Course Title:</label>
+                            <input type="text" id="courseTitle" name="courseTitle" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <textarea id="description" name="description" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="instructorId">Instructor ID:</label>
+                            <input type="text" id="instructorId" name="instructorId" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="startDate">Start Date:</label>
+                            <input type="date" id="startDate" name="startDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endDate">End Date:</label>
+                            <input type="date" id="endDate" name="endDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="duration">Duration (months):</label>
+                            <input type="number" id="duration" name="duration" min="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imageUrl">Image URL:</label>
+                            <input type="url" id="imageUrl" name="imageUrl" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imagePreview">Image Preview:</label>
+                            <img id="imagePreview" src="#" alt="Preview" style="display: none;">
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="submit-btn">Add Course</button>
+                            <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Modal functionality
+        const modal = document.getElementById('addCourseModal');
+        
+        function openModal() {
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            document.getElementById('addCourseForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Image preview functionality
+        document.getElementById('imageUrl').addEventListener('change', function() {
+            const preview = document.getElementById('imagePreview');
+            const url = this.value;
+            if(url) {
+                preview.src = url;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const courseData = Object.fromEntries(formData);
+            
+            // Here you would typically send this data to your backend
+            console.log('New Course Data:', courseData);
+            
+            // For demonstration, let's add it to the grid
+            addCourseToGrid(courseData);
+            
+            closeModal();
+        }
+
+        function addCourseToGrid(courseData) {
+            const coursesGrid = document.querySelector('.courses-grid');
+            const newCourseCard = document.createElement('div');
+            newCourseCard.className = 'course-card';
+            newCourseCard.innerHTML = `
+                <div class="course-image-container">
+                    <img src="${courseData.imageUrl}" alt="${courseData.courseTitle}" class="course-image">
+                </div>
+                <h3 class="course-title">${courseData.courseTitle}</h3>
+                <button class="view-course-btn">View Course</button>
+            `;
+            coursesGrid.appendChild(newCourseCard);
+            <!-- Add this HTML code just before the closing body tag in your existing HTML file -->
+
+
+        }
+         // Add this JavaScript code to your existing script section
+
+// Course details modal functionality
+function viewCourseDetails(courseData) {
+  const detailsModal = document.getElementById('viewCourseModal');
+  const detailsContent = document.getElementById('courseDetailsContent');
+  
+  // Format dates for display
+  const startDate = new Date(courseData.startDate).toLocaleDateString();
+  const endDate = new Date(courseData.endDate).toLocaleDateString();
+  
+  // Populate modal with course details
+  detailsContent.innerHTML = `
+      <div class="course-details-grid">
+          <div class="detail-row">
+              <strong>Course ID:</strong>
+              <span>${courseData.courseId}</span>
+          </div>
+          <div class="detail-row">
+              <strong>Course Title:</strong>
+              <span>${courseData.courseTitle}</span>
+          </div>
+          <div class="detail-row">
+              <strong>Instructor ID:</strong>
+              <span>${courseData.instructorId}</span>
+          </div>
+          <div class="detail-row">
+              <strong>Duration:</strong>
+              <span>${courseData.duration} months</span>
+          </div>
+          <div class="detail-row">
+              <strong>Start Date:</strong>
+              <span>${startDate}</span>
+          </div>
+          <div class="detail-row">
+              <strong>End Date:</strong>
+              <span>${endDate}</span>
+          </div>
+          <div class="detail-row full-width">
+              <strong>Description:</strong>
+              <p>${courseData.description}</p>
+          </div>
+          <div class="detail-row full-width">
+              <strong>Course Image:</strong>
+              <img src="${courseData.imageUrl}" alt="${courseData.courseTitle}" class="details-image">
+          </div>
+      </div>
+  `;
+  
+  detailsModal.style.display = "block";
+}
+
+// Function to close view details modal
+function closeViewModal() {
+  const detailsModal = document.getElementById('viewCourseModal');
+  detailsModal.style.display = "none";
+}
+
+// Update the addCourseToGrid function to include course details
+function addCourseToGrid(courseData) {
+  const coursesGrid = document.querySelector('.courses-grid');
+  const newCourseCard = document.createElement('div');
+  newCourseCard.className = 'course-card';
+  newCourseCard.innerHTML = `
+      <div class="course-image-container">
+          <img src="${courseData.imageUrl}" alt="${courseData.courseTitle}" class="course-image">
+      </div>
+      <h3 class="course-title">${courseData.courseTitle}</h3>
+      <button class="view-course-btn" onclick='viewCourseDetails(${JSON.stringify(courseData)})'>View Course</button>
+  `;
+  coursesGrid.appendChild(newCourseCard);
+}
+// Add these functions to your existing JavaScript
+
+let courseToDelete = null;
+
+function deleteCourse(courseId) {
+    courseToDelete = courseId;
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    deleteModal.style.display = 'block';
+    
+    // Set up confirmation button
+    document.getElementById('confirmDelete').onclick = function() {
+        const courseElement = document.getElementById(courseId);
+        if (courseElement) {
+            // Add removal animation
+            courseElement.classList.add('removing');
+            
+            // Remove element after animation
+            setTimeout(() => {
+                courseElement.remove();
+            }, 300);
+        }
+        closeDeleteModal();
+    };
+}
+
+function closeDeleteModal() {
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    deleteModal.style.display = 'none';
+    courseToDelete = null;
+}
+
+// Update the addCourseToGrid function to include delete button
+function addCourseToGrid(courseData) {
+    const coursesGrid = document.querySelector('.courses-grid');
+    const newCourseCard = document.createElement('div');
+    newCourseCard.className = 'course-card';
+    newCourseCard.id = courseData.courseId;
+    newCourseCard.innerHTML = `
+        <div class="course-image-container">
+            <img src="${courseData.imageUrl}" alt="${courseData.courseTitle}" class="course-image">
+        </div>
+        <h3 class="course-title">${courseData.courseTitle}</h3>
+        <div class="button-group">
+            <button class="view-course-btn" onclick='viewCourseDetails(${JSON.stringify(courseData)})'>View Course</button>
+            <button class="delete-course-btn" onclick="deleteCourse('${courseData.courseId}')">Delete</button>
+        </div>
+    `;
+    coursesGrid.appendChild(newCourseCard);
+}
+
+// Update window click handler to handle both modals
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = "none";
+        if (event.target.id === 'deleteConfirmModal') {
+            courseToDelete = null;
+        }
+    }
+}
+     
+     
+     
+    
+    </script>
+    <!-- Add this HTML code just before the closing body tag in your existing HTML file -->
+
+<!-- View Course Details Modal -->
+<div id="viewCourseModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeViewModal()">&times;</span>
+        <h2>Course Details</h2>
+        <div id="courseDetailsContent"></div>
+        <div class="form-buttons">
+            <button type="button" class="cancel-btn" onclick="closeViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+<!-- Update the course cards in your HTML with delete buttons -->
+<div class="courses-grid">
+    <div class="course-card" id="WD101">
+        <div class="course-image-container">
+            <img src="web-dev.jpg" alt="Web Development" class="course-image">
+        </div>
+        <h3 class="course-title">Web Development Fundamentals</h3>
+        <div class="button-group">
+            <button class="view-course-btn" onclick='viewCourseDetails({
+                "courseId": "WD101",
+                "courseTitle": "Web Development Fundamentals",
+                "description": "Learn the basics of web development including HTML, CSS, and JavaScript. This comprehensive course will give you a solid foundation in modern web development practices.",
+                "instructorId": "INS001",
+                "startDate": "2025-03-01",
+                "endDate": "2025-06-01",
+                "duration": 3,
+                "imageUrl": "web-dev.jpg"
+            })'>View Course</button>
+            <button class="delete-course-btn" onclick="deleteCourse('WD101')">Delete</button>
+        </div>
+    </div>
+
+    <div class="course-card" id="PY101">
+        <div class="course-image-container">
+            <img src="python.jpg" alt="Python Programming" class="course-image">
+        </div>
+        <h3 class="course-title">Python Programming</h3>
+        <div class="button-group">
+            <button class="view-course-btn" onclick='viewCourseDetails({
+                "courseId": "PY101",
+                "courseTitle": "Python Programming",
+                "description": "Master Python programming from basics to advanced concepts. Learn data structures, algorithms, and practical applications.",
+                "instructorId": "INS002",
+                "startDate": "2025-03-15",
+                "endDate": "2025-07-15",
+                "duration": 4,
+                "imageUrl": "python.jpg"
+            })'>View Course</button>
+            <button class="delete-course-btn" onclick="deleteCourse('PY101')">Delete</button>
+        </div>
+    </div>
+
+    <div class="course-card" id="DS101">
+        <div class="course-image-container">
+            <img src="data-science.jpg" alt="Data Science" class="course-image">
+        </div>
+        <h3 class="course-title">Data Science Basics</h3>
+        <div class="button-group">
+            <button class="view-course-btn" onclick='viewCourseDetails({
+                "courseId": "DS101",
+                "courseTitle": "Data Science Basics",
+                "description": "Introduction to data science concepts, statistical analysis, and machine learning fundamentals.",
+                "instructorId": "INS003",
+                "startDate": "2025-04-01",
+                "endDate": "2025-08-01",
+                "duration": 4,
+                "imageUrl": "data-science.jpg"
+            })'>View Course</button>
+            <button class="delete-course-btn" onclick="deleteCourse('DS101')">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content">
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this course?</p>
+        <div class="form-buttons">
+            <button id="confirmDelete" class="delete-btn">Delete</button>
+            <button onclick="closeDeleteModal()" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

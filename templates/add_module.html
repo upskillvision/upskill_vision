@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/course.css')}}">
+</head>
+<body>
+    <div id="courseModal" class="modal">
+        <div class="modal-content container">
+            <form method="post">
+                <h2>Add New Module</h2>
+                <div class="coursefield" name="title">
+                    <p><strong>Course:</strong> <span id="title"></span></p> 
+                    <select name="course_id" required>
+                        <option value="{{current[0]}}" selected>{{current[1]}}</option>
+                            {% for course in courses %}
+                        <option value="{{ course[0] }}">{{ course[1] }}</option>
+                            {% endfor %}
+                    </select>
+                </div>
+                <div class="coursefield" name="title">
+                    <p><strong>Title:</strong> <span id="title"></span></p> 
+                    <input type="text" name="title" placeholder="Course Name" required>
+                </div>
+                <div class="coursefield" name="content">
+                    <p><strong>Content:</strong> <span id="content"></span></p>
+                    <textarea type="text" name="content" placeholder="Description" required></textarea>
+                </div>
+                <div class="coursefield" name="duration">
+                    <p><strong>Learning Points:</strong> <span id="duration"></span></p>
+                    <input type="number" name="learning_points" placeholder="Duration (months)" required>
+                </div>
+                <div class="button">
+                    <button onclick="">Add Module</button>
+                    <button onclick="window.location.href='/add_questions';" type="button">Add Question</button>
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+
+    
+</body>
+
+</html>

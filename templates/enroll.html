@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Enrollment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='enroll.js') }}"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">Upskill Vision</div>
+            <nav class="nav-links">
+                <a href="{{ url_for('mycourses') }}"><i class="fas fa-book"></i> My Courses</a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Enrollment Confirmation Modal -->
+    <div id="enrollModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Enrollment</h2>
+            <p>Are you sure you want to enroll in <span id="courseName"></span>?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm-btn" onclick="confirmEnroll()">OK</button>
+                <button class="modal-btn cancel-btn" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal success-modal">
+        <div class="modal-content fade-in">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h2 class="success-message">Thanks for enrolling!</h2>
+            <p class="success-submessage">Happy Learning! 🎉</p>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm-btn" onclick="redirectToLearning()">Start Learning</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules Modal -->
+    <div id="modulesModal" class="modal">
+        <div class="modal-content">
+            <h2>Course Modules</h2>
+            <div id="modulesList">
+                <!-- Modules will be dynamically loaded here -->
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" onclick="closeModulesModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>Course Features</h2>
+        <ul class="feature-list">
+            <li class="feature-item">
+                <span class="feature-icon"><i class="fas fa-graduation-cap"></i></span>
+                <a href="{{ url_for('index') }}">Courses</a>
+            </li>
+            <li class="feature-item">
+                <a href="{{ url_for('quizzes') }}" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-question-circle"></i></span>
+                    Quizzes
+                </a>
+            </li>
+            <li class="feature-item">
+                <span class="feature-icon"><i class="fas fa-trophy"></i></span>
+                Achievements
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-containere">
+        <div class="course-container" id="courseDetails">
+            <!-- Course details will be dynamically loaded here -->
+            <div class="loading-message">Loading courses...</div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for handling modals, enrollment, and modules
+
+        // Function to open the enrollment confirmation modal
+        function openModal(courseName, courseId) {
+            document.getElementById('courseName').textContent = courseName;
+            document.getElementById('enrollModal').style.display = 'block';
+            document.getElementById('enrollModal').dataset.courseId = courseId; // Store course ID for enrollment
+        }
+
+        // Function to close the enrollment confirmation modal
+        function closeModal() {
+            document.getElementById('enrollModal').style.display = 'none';
+        }
+
+        // Function to open the modules modal
+        function openModulesModal(courseId) {
+            fetchModules(courseId); // Fetch modules for the selected course
+            document.getElementById('modulesModal').style.display = 'block';
+        }
+
+        // Function to close the modules modal
+        function closeModulesModal() {
+            document.getElementById('modulesModal').style.display = 'none';
+        }
+
+        // Function to confirm enrollment
+        function confirmEnroll() {
+            const courseId = document.getElementById('enrollModal').dataset.courseId;
+            enrollCourse(courseId); // Call the enrollCourse function
+            closeModal();
+        }
+
+        // Function to redirect to the learning page
+        function redirectToLearning() {
+            window.location.href = "{{ url_for('learning') }}"; // Redirect to the learning page
+        }
+
+        // Close modals when clicking outside the modal content
+        window.onclick = function (event) {
+            const enrollModal = document.getElementById('enrollModal');
+            const successModal = document.getElementById('successModal');
+            const modulesModal = document.getElementById('modulesModal');
+
+            if (event.target === enrollModal) {
+                enrollModal.style.display = 'none';
+            }
+            if (event.target === successModal) {
+                successModal.style.display = 'none';
+            }
+            if (event.target === modulesModal) {
+                modulesModal.style.display = 'none';
+            }
+        };
+
+        // Function to fetch and display available courses
+        async function fetchCourses() {
+            try {
+                const response = await fetch('/api/courses');
+                if (!response.ok) {
+                    throw new Error("Failed to fetch courses");
+                }
+                const courses = await response.json();
+                const courseDetails = document.getElementById('courseDetails');
+                courseDetails.innerHTML = ''; // Clear loading message
+
+                if (courses.length === 0) {
+                    courseDetails.innerHTML = '<p>No courses available for enrollment.</p>';
+                    return;
+                }
+
+                // Populate course details
+                courses.forEach(course => {
+                    const courseCard = document.createElement('div');
+                    courseCard.classList.add('course-card');
+                    courseCard.innerHTML = `
+                        <img src="${course.images}" alt="${course.title}" class="course-image" onerror="this.onerror=null; this.src='/static/images/default.jpg';">
+                        <h3>${course.title}</h3>
+                        <p>${course.description}</p>
+                        <p><strong>Duration:</strong> ${course.duration}</p>
+                        <p><strong>Instructor ID:</strong> ${course.instructor_id}</p>
+                        <button class="enroll-btn" onclick="openModal('${course.title}', ${course.id})">Enroll Now</button>
+                        <button class="view-modules-btn" onclick="openModulesModal(${course.id})">View Modules</button>
+                    `;
+                    courseDetails.appendChild(courseCard);
+                });
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+                document.getElementById('courseDetails').innerHTML = '<p>Error loading courses. Please try again later.</p>';
+            }
+        }
+
+        // Function to fetch modules for a course
+        async function fetchModules(courseId) {
+            try {
+                const response = await fetch(`/api/courses/${courseId}/modules`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch modules");
+                }
+                const modules = await response.json();
+                const modulesList = document.getElementById('modulesList');
+                modulesList.innerHTML = ''; // Clear previous modules
+
+                if (modules.length === 0) {
+                    modulesList.innerHTML = '<p>No modules available for this course.</p>';
+                    return;
+                }
+
+                // Populate modules
+                modules.forEach(module => {
+                    const moduleItem = document.createElement('div');
+                    moduleItem.classList.add('module-item');
+                    moduleItem.innerHTML = `
+                        <h4>${module.title}</h4>
+                        <p>${module.description}</p>
+                        <p><strong>Duration:</strong> ${module.duration}</p>
+                    `;
+                    modulesList.appendChild(moduleItem);
+                });
+            } catch (error) {
+                console.error("Error fetching modules:", error);
+                document.getElementById('modulesList').innerHTML = '<p>Error loading modules. Please try again later.</p>';
+            }
+        }
+
+        // Function to enroll in a course
+        async function enrollCourse(courseId) {
+            try {
+                const userId = getUserId(); // Get the logged-in user's ID
+                const response = await fetch('/api/enroll', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        course_id: courseId
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to enroll in course");
+                }
+
+                const data = await response.json();
+                console.log("Enrollment API Response:", data); // Debugging log
+                document.getElementById('successModal').style.display = 'block'; // Show success modal
+            } catch (error) {
+                console.error("Error enrolling in course:", error);
+                alert("Failed to enroll in course. Please try again.");
+            }
+        }
+
+        // Helper function to get the logged-in user's ID
+        function getUserId() {
+            // Replace this with logic to retrieve the user ID from the session or a global variable
+            return 1; // Example: Hardcoded for now
+        }
+
+        // Fetch and display courses when the page loads
+        document.addEventListener('DOMContentLoaded', fetchCourses);
+    </script>
+</body>
+</html>

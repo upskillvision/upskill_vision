@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Modules - Upskill Vision</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Flexbox layout for the main container */
+        .main-container {
+            display: flex;
+            gap: 20px; /* Space between left and right sections */
+            padding: 20px;
+        }
+
+        /* Center the course title */
+        .course-title-container {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        /* Left side: Video section */
+        .video-section {
+            flex: 2; /* Takes 2/3 of the available space */
+            max-width: 70%; /* Adjust as needed */
+            margin-top: 40px; /* Lower the video down */
+            background-color: #000; /* Black background for blank loading screen */
+            min-height: 315px; /* Match video height */
+        }
+
+        /* Right side: Modules list */
+        .modules-list {
+            flex: 1; /* Takes 1/3 of the available space */
+            max-width: 30%; /* Adjust as needed */
+        }
+
+        /* Module card styling */
+        .module {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .module h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .module p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .module-status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .status.completed {
+            color: green;
+        }
+
+        .status.in-progress {
+            color: orange;
+        }
+
+        .radio-button {
+            margin-right: 10px;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Video player styling */
+        .video-player {
+            width: 100%;
+            height: 315px;
+            border: none;
+            display: none; /* Hidden by default */
+        }
+
+        /* Complete button styling */
+        .complete-button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .complete-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">Upskill Vision</div>
+            <nav class="nav-links">
+                <a href="{{ url_for('mycourses') }}" class="active"><i class="fas fa-book"></i> My Courses </a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <h2>Course Features</h2>
+        <ul class="feature-list">
+            <li class="feature-item">
+                <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-graduation-cap"></i></span>
+                    Courses
+                </a>
+            </li>
+            <li class="feature-item">
+                <a href="{{ url_for('quizzes') }}" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-question-circle"></i></span>
+                    Quizzes
+                </a>
+            </li>
+            <li class="feature-item">
+                <span class="feature-icon"><i class="fas fa-trophy"></i></span>
+                Achievements
+            </li>
+        </ul>
+    </aside>
+    
+    <!-- Course Title Container -->
+    <div class="course-title-container">
+        <h2 id="course-title">Introduction to AI</h2>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Side: Video Section -->
+        <div class="video-section">
+            <!-- Video Player -->
+            <video class="video-player" controls>
+                <source src="{{ url_for('static', filename='videos/sample-video.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Right Side: Modules List -->
+        <div class="modules-list">
+            <div id="modules-container" data-course-id="{{ course_id }}">
+                <!-- Modules will be dynamically inserted here -->
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i> Loading modules...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch and display modules
+        async function fetchModules() {
+            try {
+                const courseId = document.getElementById('modules-container').dataset.courseId;
+                if (!courseId) {
+                    throw new Error("Course ID not found in data attribute");
+                }
+
+                // Fetch course details to update the title
+                const courseResponse = await fetch(`/api/courses/${courseId}`);
+                if (!courseResponse.ok) {
+                    throw new Error("Failed to fetch course details");
+                }
+                const course = await courseResponse.json();
+
+                // Update the course title
+                document.getElementById('course-title').textContent = course.title;
+
+                // Fetch modules for the selected course
+                const modulesResponse = await fetch(`/api/courses/${courseId}/modules`);
+                if (!modulesResponse.ok) {
+                    throw new Error("Failed to fetch modules");
+                }
+                const modules = await modulesResponse.json();
+
+                // Render modules
+                const container = document.getElementById('modules-container');
+                container.innerHTML = ''; // Clear loading message
+
+                if (modules.length === 0) {
+                    container.innerHTML = '<p class="empty-message">No modules found for this course.</p>';
+                    return;
+                }
+
+                let html = '';
+                modules.forEach(module => {
+                    html += `
+                        <div class="module" data-module-id="${module.id}">
+                            <label>
+                                <input type="radio" name="module" value="${module.id}" class="radio-button" onchange="loadModuleContent(${module.id})">
+                                <h3>${module.title}</h3>
+                                <p><strong>Learning Points:</strong> ${module.learning_points}</p>
+                                <p><strong>Status:</strong> <span class="module-status ${module.is_completed ? 'completed' : 'in-progress'}">
+                                    ${module.is_completed ? '✓ Completed' : '● In Progress'}
+                                </span></p>
+                                ${module.is_completed ? '' : `<button class="complete-button" onclick="markAsCompleted(${module.id})">Mark as Completed</button>`}
+                            </label>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('modules-container').innerHTML = `
+                    <p class="error-message">
+                        Error loading modules. Please try again later.<br>
+                        <small>${error.message}</small>
+                    </p>
+                `;
+            }
+        }
+
+        // Function to mark a module as completed (frontend-only)
+        function markAsCompleted(moduleId) {
+            const moduleElement = document.querySelector(`.module[data-module-id="${moduleId}"]`);
+            if (moduleElement) {
+                const statusElement = moduleElement.querySelector('.module-status');
+                statusElement.textContent = '✓ Completed';
+                statusElement.className = 'module-status completed';
+
+                // Remove the "Mark as Completed" button
+                const completeButton = moduleElement.querySelector('.complete-button');
+                if (completeButton) {
+                    completeButton.remove();
+                }
+            }
+        }
+
+        // Fetch and display modules when the page loads
+        fetchModules();
+    </script>
+</body>
+</html>

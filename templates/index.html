@@ -1,15 +1,320 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Course List</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upskill Vision</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 </head>
 <body>
-    <h1>Available Courses</h1>
-    <ul>
-        {% for course in courses %}
-            <li><strong>{{ course[1] }}</strong>: {{ course[2] }}</li>
-        {% endfor %}
-    </ul>
-    <a href="{{ url_for('dashboard') }}">Admin Dashboard</a>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">Upskill Vision</div>
+            <nav class="nav-links">
+                <a href="{{ url_for('mycourses') }}" onclick="return false;"><i class="fas fa-book"></i> My Courses</a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="content-container">
+        <aside class="sidebar">
+            <h2>Course Features</h2>
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <a href="#" onclick="applyCourseFilter('all'); return false;">
+                        <span class="feature-icon"><i class="fas fa-graduation-cap"></i></span>
+                        Courses
+                    </a>
+                </li>
+                <li class="feature-item">
+                    <a href="{{ url_for('quizzes') }}">
+                        <span class="feature-icon"><i class="fas fa-question-circle"></i></span>
+                        Quizzes
+                    </a>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon"><i class="fas fa-trophy"></i></span>
+                    Achievements
+                </li>
+            </ul>
+            
+            <div class="filter-section">
+                <h3>Filter Courses</h3>
+                <div class="filter-options">
+                    <div class="filter-option">
+                        <input type="radio" id="filter-all" name="course-filter" value="all" checked onchange="applyCourseFilter('all')">
+                        <label for="filter-all">All Courses</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" id="filter-enrolled" name="course-filter" value="enrolled" onchange="applyCourseFilter('enrolled')">
+                        <label for="filter-enrolled">Enrolled</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" id="filter-completed" name="course-filter" value="completed" onchange="applyCourseFilter('enrolled')">
+                        <label for="filter-completed">Completed </label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-containeri">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search Here" oninput="filterCourses()">
+                <button class="search-btn" onclick="filterCourses()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Bar Chart Section -->
+            <div class="chart-container">
+                <h2>My Course Progress</h2>
+                <canvas id="progressChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Courses Grid -->
+            <div class="courses-grid" id="coursesGrid">
+                <!-- Courses will be dynamically loaded here -->
+                <div class="loading-message">Loading courses...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules Modal -->
+    <div id="modulesModal" class="modal">
+        <div class="modal-content">
+            <h2>Course Modules</h2>
+            <div id="modulesList">
+                <!-- Modules will be dynamically loaded here -->
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" onclick="closeModulesModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+    <script src="{{ url_for('static', filename='quizzes.js') }}"></script>
+
+    <!-- Script for Progress Bar Chart -->
+    <script>
+        let allCourses = []; // Store all courses fetched from the API
+
+        // Fetch progress data for the logged-in user
+        const userId = 1; // Replace with dynamic user ID (e.g., from session or query parameter)
+        fetch(`/api/user-progress/${userId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch progress data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const labels = data.labels; // Course titles
+                const progress = data.progress; // Progress percentages
+
+                // Create the bar chart
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                const progressChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Progress (%)',
+                            data: progress,
+                            backgroundColor: '#7c3aed', // Purple background for all bars
+                            borderColor: '#7c3aed', // Purple border for all bars
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Progress (%)',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 15,
+                                        color: '#000000'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        weight: 'bold',
+                                        size: 15,
+                                        color: '#000000'
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Course Name',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 15,
+                                        color: '#000000'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        weight: 'bold',
+                                        size: 15,
+                                        color: '#000000'
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false // Hide the legend
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching progress data:', error);
+                document.querySelector('.chart-container').innerHTML = '<p>Error loading progress chart. Please try again later.</p>';
+            });
+
+        // Fetch and display courses
+        fetch('/api/courses?user_id=1') // Replace with dynamic user ID
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+                return response.json();
+            })
+            .then(courses => {
+                allCourses = courses; // Store all courses
+                renderCourses(courses); // Render all courses initially
+            })
+            .catch(error => {
+                console.error('Error fetching courses:', error);
+                document.getElementById('coursesGrid').innerHTML = '<p>Error loading courses. Please try again later.</p>';
+            });
+
+        function renderCourses(courses) {
+            const coursesGrid = document.getElementById('coursesGrid');
+            coursesGrid.innerHTML = ''; // Clear loading message
+
+            if (courses.length === 0) {
+                coursesGrid.innerHTML = '<p>No courses found.</p>';
+                return;
+            }
+
+            // Render courses
+            courses.forEach(course => {
+                const progress = parseFloat(course.progress) || 0; // Parse progress as a number
+                const isCompleted = progress === 100; // Courses with 100% progress are considered completed
+                const isEnrolled = course.status === "enrolled" || course.status === "completed";
+
+                const card = document.createElement('div');
+                card.className = 'course-card';
+                card.innerHTML = `
+                    <!-- Circular Progress Bar in Top-Right Corner -->
+                    <div class="circular-progress" data-progress="${progress}" style="--progress: ${progress}%;"></div>
+                    
+                    <!-- Course Image -->
+                    <img src="${course.images}" alt="${course.title}" class="course-image" onerror="this.onerror=null; this.src='/static/images/default.jpg';">
+                    
+                    <!-- Course Title and Info -->
+                    <h3 class="course-title">${course.title}</h3>
+                    <p class="course-info">${course.description}</p>
+                    
+                    <!-- Buttons -->
+                    <div class="button-container">
+                        <button class="enroll-btn ${isEnrolled ? 'disabled' : ''}" onclick="${isEnrolled ? '' : `enrollCourse(${course.id})`}" ${isEnrolled ? 'disabled' : ''}>
+                            <i class="fas fa-sign-in-alt"></i> ${isEnrolled ? (isCompleted ? "Completed" : "Enrolled") : "Enroll Now"}
+                        </button>
+                        ${isEnrolled ? `
+                            <button class="view-course-btn" onclick="viewCourseModules(${course.id})">
+                                <i class="fas fa-list"></i> View Course
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                coursesGrid.appendChild(card);
+            });
+        }
+
+        // Function to enroll in a course
+        function enrollCourse(courseId) {
+            fetch('/api/enroll', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId, course_id: courseId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || 'Enrollment successful');
+                window.location.reload(); // Refresh the page to update the UI
+            })
+            .catch(error => {
+                console.error('Error enrolling in course:', error);
+                alert('Failed to enroll in course. Please try again.');
+            });
+        }
+
+        // Function to view course modules
+        function viewCourseModules(courseId) {
+            fetch(`/api/courses/${courseId}/modules`) // Fetch modules for the selected course
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch course modules');
+                    }
+                    return response.json();
+                })
+                .then(modules => {
+                    displayCourseModules(modules);
+                })
+                .catch(error => {
+                    console.error('Error fetching course modules:', error);
+                    alert('Failed to load course modules. Please try again later.');
+                });
+        }
+
+        // Function to display course modules in a modal
+        function displayCourseModules(modules) {
+            const modulesModal = document.getElementById('modulesModal');
+            const modulesList = document.getElementById('modulesList');
+            modulesList.innerHTML = ''; // Clear previous modules
+
+            if (modules.length === 0) {
+                modulesList.innerHTML = '<p>No modules available for this course.</p>';
+            } else {
+                modules.forEach(module => {
+                    const moduleItem = document.createElement('div');
+                    moduleItem.className = 'module-item';
+                    moduleItem.innerHTML = `
+                        <h4>${module.title}</h4>
+                        <p>${module.description}</p>
+                        <p><strong>Duration:</strong> ${module.duration}</p>
+                    `;
+                    modulesList.appendChild(moduleItem);
+                });
+            }
+
+            modulesModal.style.display = 'block'; // Show the modal
+        }
+
+        // Function to close the modules modal
+        function closeModulesModal() {
+            const modulesModal = document.getElementById('modulesModal');
+            modulesModal.style.display = 'none'; // Hide the modal
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - Upskill Vision</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">Upskill Vision</div>
+            <nav class="nav-links">
+                <a href="{{ url_for('mycourses') }}" class="active"><i class="fas fa-book"></i> My Courses </a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <h2>Course Features</h2>
+        <ul class="feature-list">
+            <li class="feature-item">
+                <a href="{{ url_for('index') }}" onclick="applyCourseFilter('all'); return false;" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-graduation-cap"></i></span>
+                    Courses
+                </a>
+            </li>
+            <li class="feature-item">
+                <a href="{{ url_for('quizzes') }}" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-question-circle"></i></span>
+                    Quizzes
+                </a>
+            </li>
+            <li class="feature-item">
+                <span class="feature-icon"><i class="fas fa-trophy"></i></span>
+                Achievements
+            </li>
+        </ul>
+    </aside>
+    
+    <div class="main-container">
+        <h2 class="section-title">Enrolled Courses</h2>
+        <div id="enrolled-courses" class="courses-grid">
+            <!-- Enrolled courses will be loaded here -->
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Loading enrolled courses...
+            </div>
+        </div>
+       
+        <h2 class="section-title">Completed Courses</h2>
+        <div id="completed-courses" class="courses-grid">
+            <!-- Completed courses will be loaded here -->
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Loading completed courses...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch and display courses
+        async function loadCourses() {
+            try {
+                const userId = getUserId(); // Get the logged-in user's ID
+                const response = await fetch(`/api/enrolled-courses/${userId}`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch courses");
+                }
+                const courses = await response.json();
+
+                // Separate enrolled and completed courses
+                const enrolledCourses = courses.filter(course => course.status !== 'completed');
+                const completedCourses = courses.filter(course => course.status === 'completed');
+
+                // Render enrolled courses
+                const enrolledContainer = document.getElementById('enrolled-courses');
+                renderCourses(enrolledContainer, enrolledCourses, 'You are not enrolled in any courses.');
+
+                // Render completed courses
+                const completedContainer = document.getElementById('completed-courses');
+                renderCourses(completedContainer, completedCourses, 'You have not completed any courses yet.');
+            } catch (error) {
+                console.error("Error loading courses:", error);
+                document.getElementById('enrolled-courses').innerHTML = '<p class="error-message">Error loading courses. Please try again later.</p>';
+                document.getElementById('completed-courses').innerHTML = '<p class="error-message">Error loading courses. Please try again later.</p>';
+            }
+        }
+
+        // Function to render courses in a container
+        function renderCourses(container, courses, emptyMessage) {
+            container.innerHTML = ''; // Clear loading message
+
+            if (courses.length === 0) {
+                container.innerHTML = `<p class="empty-message">${emptyMessage}</p>`;
+                return;
+            }
+
+            courses.forEach(course => {
+                container.appendChild(createCourseCard(course));
+            });
+        }
+
+        // Function to create a course card
+        function createCourseCard(course) {
+            const courseCard = document.createElement('div');
+            courseCard.className = 'course-card';
+            courseCard.innerHTML = `
+                <img src="${course.images}" alt="${course.title}" onerror="this.onerror=null; this.src='/static/images/default.jpg';">
+                <h3 class="course-title">${course.title}</h3>
+                <p>${course.description}</p>
+                <p><strong>Duration:</strong> ${course.duration} hours</p>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${course.progress}%;"></div>
+                </div>
+                <p><strong>Status:</strong> ${course.status}</p>
+            `;
+
+            // Add click event to the course card
+            courseCard.addEventListener('click', () => {
+                // Redirect to the course details page
+                window.location.href = `/course/${course.id}`;
+            });
+
+            return courseCard;
+        }
+
+        // Helper function to get the logged-in user's ID
+        function getUserId() {
+            // Replace this with logic to retrieve the user ID from the session or a global variable
+            return 1; // Example: Hardcoded for now
+        }
+
+        // Load courses when the page loads
+        window.onload = loadCourses;
+    </script>
+</body>
+</html>

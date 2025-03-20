@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upskill Vision - Quizzes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header" id="main-header">
+        <div class="nav-container">
+            <div class="logo">Upskill Vision</div>
+            <nav class="nav-links" id="nav-links">
+                <a href="{{ url_for('mycourses') }}" onclick="applyCourseFilter('enrolled'); return false;">
+                    <i class="fas fa-book"></i> My Courses
+                </a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Sidebar Section -->
+    <aside class="sidebar" id="sidebar">
+        <h2>Course Features</h2>
+        <ul class="feature-list">
+            <li class="feature-item">
+                <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-graduation-cap"></i></span>
+                    Courses
+                </a>
+            </li>
+            <li class="feature-item">
+                <a href="{{ url_for('quizzes') }}" id="quizzes-link" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-question-circle"></i></span>
+                    Quizzes
+                </a>
+            </li>
+            <li class="feature-item">
+                <span class="feature-icon"><i class="fas fa-trophy"></i></span>
+                Achievements
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Quiz Page - Main Container -->
+    <div id="quiz-page" class="main-containeri">
+        <div class="quiz-container">
+            <h2>My Quizzes</h2>
+            <div class="course-cards" id="course-cards">
+                <!-- Enrolled course cards will be dynamically populated here -->
+                <p>Loading enrolled courses...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Questions Section - Initially Hidden -->
+    <div id="quiz-questions" class="main-containeri hidden">
+        <button id="exit-quiz-btn" class="exit-quiz">Exit Quiz</button>
+        <div class="quiz-container">
+            <h2 id="quiz-title">Course Quiz</h2>
+            <div id="question-container">
+                <!-- Quiz questions and options will be dynamically loaded here -->
+            </div>
+            <div class="quiz-navigation">
+                <button id="submit-quiz-btn" class="quiz-submit-btn">Submit Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Results Section - Initially Hidden -->
+    <div id="quiz-results" class="main-containeri hidden">
+        <div class="quiz-container">
+            <h2>Quiz Results</h2>
+            <div class="quiz-result">
+                <p>You've completed the quiz!</p>
+                <!-- Score Chart -->
+                <div class="score-chart">
+                    <div class="chart" id="score-chart">
+                        <div class="chart-fill" id="chart-fill"></div>
+                        <div class="chart-text" id="chart-text">0%</div>
+                    </div>
+                </div>
+                <div class="quiz-score" id="quiz-score">Score: 0/0</div>
+                <div class="quiz-points" id="quiz-points">Total Points: 0</div>
+                <button id="return-to-quiz-btn" class="take-quiz-btn">Return to Quizzes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exit Confirmation Modal - Initially Hidden -->
+    <div id="exit-confirmation-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Exit quiz?</h3>
+            <p>Results cannot be saved</p>
+            <div class="modal-buttons">
+                <button id="confirm-exit-btn" class="modal-btn modal-btn-yes">Yes</button>
+                <button id="cancel-exit-btn" class="modal-btn modal-btn-no">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include quizzes.js -->
+    <script src="{{ url_for('static', filename='quizzes.js') }}"></script>
+</body>
+</html>

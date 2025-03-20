@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Modules - Upskill Vision</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .module-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .module-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .module-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .module-status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .status.completed {
+            color: green;
+        }
+        .status.in-progress {
+            color: orange;
+        }
+        .module-content {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .loading-spinner {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+        .radio-button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">Upskill Vision</div>
+            <nav class="nav-links">
+                <a href="{{ url_for('mycourses') }}" class="active"><i class="fas fa-book"></i> My Courses </a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <h2>Course Features</h2>
+        <ul class="feature-list">
+            <li class="feature-item">
+                <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-graduation-cap"></i></span>
+                    Courses
+                </a>
+            </li>
+            <li class="feature-item">
+                <a href="{{ url_for('quizzes') }}" style="text-decoration: none; color: inherit;">
+                    <span class="feature-icon"><i class="fas fa-question-circle"></i></span>
+                    Quizzes
+                </a>
+            </li>
+            <li class="feature-item">
+                <span class="feature-icon"><i class="fas fa-trophy"></i></span>
+                Achievements
+            </li>
+        </ul>
+    </aside>
+    
+    <div class="main-container">
+        <h2 class="section-title" id="course-title">Course Modules</h2>
+        <div id="modules-list" class="modules-grid">
+            <!-- Modules will be dynamically loaded here -->
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Loading modules...
+            </div>
+        </div>
+
+        <!-- Module Content Section -->
+        <div id="module-content" class="module-content" style="display: none;">
+            <h3 id="module-content-title"></h3>
+            <p id="module-content-description"></p>
+            <p><strong>Duration:</strong> <span id="module-content-duration"></span></p>
+            <div id="module-content-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch and display modules
+        async function loadModules() {
+            try {
+                const courseId = new URLSearchParams(window.location.search).get('course_id');
+                if (!courseId) {
+                    throw new Error("Course ID not found in URL");
+                }
+
+                // Fetch course details to update the title
+                const courseResponse = await fetch(`/api/courses/${courseId}`);
+                if (!courseResponse.ok) {
+                    throw new Error("Failed to fetch course details");
+                }
+                const course = await courseResponse.json();
+
+                // Update the course title
+                document.getElementById('course-title').textContent = `${course.title} Modules`;
+
+                // Fetch modules for the selected course
+                const modulesResponse = await fetch(`/api/courses/${courseId}/modules`);
+                if (!modulesResponse.ok) {
+                    throw new Error("Failed to fetch modules");
+                }
+                const modules = await modulesResponse.json();
+
+                // Render modules
+                const modulesList = document.getElementById('modules-list');
+                modulesList.innerHTML = ''; // Clear loading message
+
+                if (modules.length === 0) {
+                    modulesList.innerHTML = '<p class="empty-message">No modules found for this course.</p>';
+                    return;
+                }
+
+                modules.forEach(module => {
+                    const moduleCard = document.createElement('div');
+                    moduleCard.className = 'module-card';
+                    moduleCard.innerHTML = `
+                        <label>
+                            <input type="radio" name="module" value="${module.id}" class="radio-button" onchange="loadModuleContent(${module.id})">
+                            <h4>${module.title}</h4>
+                            <p>${module.description}</p>
+                            <p><strong>Duration:</strong> ${module.duration}</p>
+                            <div class="module-status">
+                                <span class="status ${module.is_completed ? 'completed' : 'in-progress'}">
+                                    ${module.is_completed ? '✓ Completed' : '● In Progress'}
+                                </span>
+                            </div>
+                        </label>
+                    `;
+                    modulesList.appendChild(moduleCard);
+                });
+            } catch (error) {
+                console.error("Error loading modules:", error);
+                document.getElementById('modules-list').innerHTML = `
+                    <p class="error-message">
+                        Error loading modules. Please try again later.<br>
+                        <small>${error.message}</small>
+                    </p>
+                `;
+            }
+        }
+
+        // Function to load module content when a radio button is selected
+        async function loadModuleContent(moduleId) {
+            try {
+                const response = await fetch(`/api/modules/${moduleId}`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch module content");
+                }
+                const module = await response.json();
+
+                // Display module content
+                const moduleContentSection = document.getElementById('module-content');
+                moduleContentSection.style.display = 'block';
+
+                document.getElementById('module-content-title').textContent = module.title;
+                document.getElementById('module-content-description').textContent = module.description;
+                document.getElementById('module-content-duration').textContent = module.duration;
+                document.getElementById('module-content-body').innerHTML = module.content || 'No content available.';
+            } catch (error) {
+                console.error("Error loading module content:", error);
+                document.getElementById('module-content').innerHTML = `
+                    <p class="error-message">
+                        Error loading module content. Please try again later.<br>
+                        <small>${error.message}</small>
+                    </p>
+                `;
+            }
+        }
+
+        // Load modules when the page loads
+        window.onload = loadModules;
+    </script>
+</body>
+</html>

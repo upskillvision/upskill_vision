@@ -312,13 +312,14 @@ def update_progress():
 def get_course_modules(course_id):
     try:
         # Fetch modules for the specified course_id
-        modules = execute_query("SELECT * FROM module WHERE course_id = ?", (course_id,), fetch_all=True)
+        modules = execute_query("SELECT * FROM module WHERE course_id = ? order by module_no", (course_id,), fetch_all=True)
         
         if not modules:
             return jsonify({"error": "No modules found for this course"}), 404
 
         # Convert the result to a list of dictionaries
         module_list = [dict(module) for module in modules]
+        print(module_list)
         return jsonify(module_list), 200
     except Exception as e:
         logger.error(f"Error fetching course modules: {e}")
@@ -472,7 +473,7 @@ def submit_rating():
 def insert_quiz_question(question_text, course_id, options_json, answer, points):
     conn = sqlite3.connect("upskill_vision.db")
     cursor = conn.cursor()
-    
+    print(question_text, course_id, options_json, answer, points)
     cursor.execute('''
     INSERT INTO quiz(question_text,course_id, options, correct_answer, points)
     VALUES (?, ?, ?,?, ?)

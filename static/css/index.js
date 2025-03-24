@@ -150,6 +150,7 @@ function viewCourseModules(courseId) {
             return response.json();
         })
         .then(modules => {
+            console.log(modules);
             displayCourseModules(modules); // Display the modules in a modal
         })
         .catch(error => {
@@ -161,6 +162,7 @@ function viewCourseModules(courseId) {
 // Function to display course modules in a modal
 function displayCourseModules(modules) {
     const modulesModal = document.createElement("div");
+    console.log(modules);
     modulesModal.classList.add("modal");
     modulesModal.innerHTML = `
         <div class="modal-content">
@@ -169,8 +171,8 @@ function displayCourseModules(modules) {
                 ${modules.length > 0 ? modules.map(module => `
                     <div class="module-item">
                         <h4>${module.title}</h4>
-                        <p>${module.description}</p>
-                        <p><strong>Duration:</strong> ${module.duration}</p>
+                        <p>${module.content}</p>
+                        <p><strong>Duration:</strong> ${module.learning_points}</p>
                     </div>
                 `).join("") : "<p>No modules available for this course.</p>"}
             </div>

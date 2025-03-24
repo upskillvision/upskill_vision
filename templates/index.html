@@ -98,8 +98,8 @@
     </div>
 
     <!-- JavaScript Files -->
-    <script src="{{ url_for('static', filename='index.js') }}"></script>
-    <script src="{{ url_for('static', filename='quizzes.js') }}"></script>
+    <script src="{{ url_for('static', filename='css/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='css/quizzes.js') }}"></script>
 
     <!-- Script for Progress Bar Chart -->
     <script>
@@ -300,8 +300,8 @@
                     moduleItem.className = 'module-item';
                     moduleItem.innerHTML = `
                         <h4>${module.title}</h4>
-                        <p>${module.description}</p>
-                        <p><strong>Duration:</strong> ${module.duration}</p>
+                        <p>${module.content}</p>
+                        <p><strong>Points:</strong> ${module.learning_points}</p>
                     `;
                     modulesList.appendChild(moduleItem);
                 });
